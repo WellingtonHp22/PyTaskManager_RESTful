@@ -1,0 +1,702 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API RESTful de Gerenciamento de Tarefas",
+    "description": "API para gerenciamento de tarefas pessoais usando Flask",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Wellington Santos"
+    }
+  },  "host": "127.0.0.1:8080",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Adicione 'Bearer ' antes do token JWT"
+    }
+  },
+  "paths": {
+    "/register": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Registra um novo usuário",
+        "description": "Cria uma nova conta de usuário no sistema",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Dados de registro do usuário",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "email",
+                "password"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "usuario_teste"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "usuario@exemplo.com"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password",
+                  "example": "senha123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação ou usuário já existente"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Realiza login no sistema",
+        "description": "Autentica um usuário e retorna um token JWT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Credenciais de login",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "password"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "usuario_teste"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password",
+                  "example": "senha123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Login realizado com sucesso"
+                },
+                "access_token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user_id": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "username": {
+                  "type": "string",
+                  "example": "usuario_teste"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Realiza logout no sistema",
+        "description": "Invalida o token JWT atual",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout realizado com sucesso"
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          }
+        }
+      }
+    },
+    "/user/me": {
+      "get": {
+        "tags": [
+          "Usuário"
+        ],
+        "summary": "Obtém informações do usuário atual",
+        "description": "Retorna os dados do usuário autenticado",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "username": {
+                  "type": "string",
+                  "example": "usuario_teste"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "usuario@exemplo.com"
+                },
+                "tasks_count": {
+                  "type": "integer",
+                  "example": 5
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "tags": [
+          "Tarefas"
+        ],
+        "summary": "Lista tarefas do usuário atual",
+        "description": "Retorna todas as tarefas do usuário autenticado",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "type": "string",
+            "description": "Filtrar por status (pendente, em_andamento, concluida)"
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "type": "string",
+            "description": "Filtrar por prioridade (baixa, media, alta)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "description": "Número da página (padrão: 1)",
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "type": "integer",
+            "description": "Quantidade de itens por página (padrão: 10, máximo: 50)",
+            "default": 10
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "type": "string",
+            "description": "Campo para ordenação (due_date, created_at, priority)",
+            "enum": ["due_date", "created_at", "priority"],
+            "default": "due_date"
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "type": "string",
+            "description": "Ordem de classificação (asc, desc)",
+            "enum": ["asc", "desc"],
+            "default": "asc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",            "schema": {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Task"
+                  }
+                },
+                "pagination": {
+                  "type": "object",
+                  "properties": {
+                    "total_tasks": {
+                      "type": "integer",
+                      "example": 35
+                    },
+                    "per_page": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "current_page": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "total_pages": {
+                      "type": "integer",
+                      "example": 4
+                    },
+                    "has_next": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "has_prev": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tarefas"
+        ],
+        "summary": "Cria uma nova tarefa",
+        "description": "Adiciona uma nova tarefa para o usuário autenticado",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Dados da nova tarefa",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Implementar API Flask"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Desenvolver uma API REST com Flask"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pendente",
+                    "em_andamento",
+                    "concluida"
+                  ],
+                  "default": "pendente"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "baixa",
+                    "media",
+                    "alta"
+                  ],
+                  "default": "media"
+                },
+                "due_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2025-12-31 23:59:59"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tarefa criada com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/task/{task_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "task_id",
+          "type": "integer",
+          "required": true,
+          "description": "ID da tarefa"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Tarefas"
+        ],
+        "summary": "Obtém detalhes de uma tarefa",
+        "description": "Retorna os dados de uma tarefa específica",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          },
+          "403": {
+            "description": "Proibido - A tarefa não pertence ao usuário"
+          },
+          "404": {
+            "description": "Tarefa não encontrada"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tarefas"
+        ],
+        "summary": "Atualiza uma tarefa existente",
+        "description": "Modifica os dados de uma tarefa específica",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Dados para atualização da tarefa",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Título atualizado"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Descrição atualizada"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pendente",
+                    "em_andamento",
+                    "concluida"
+                  ]
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "baixa",
+                    "media",
+                    "alta"
+                  ]
+                },
+                "due_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2025-12-31 23:59:59"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarefa atualizada com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          },
+          "403": {
+            "description": "Proibido - A tarefa não pertence ao usuário"
+          },
+          "404": {
+            "description": "Tarefa não encontrada"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tarefas"
+        ],
+        "summary": "Remove uma tarefa",
+        "description": "Exclui uma tarefa específica do banco de dados",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarefa excluída com sucesso"
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          },
+          "403": {
+            "description": "Proibido - A tarefa não pertence ao usuário"
+          },
+          "404": {
+            "description": "Tarefa não encontrada"
+          }
+        }
+      }
+    },    "/tasks/stats": {
+      "get": {
+        "tags": [
+          "Estatísticas"
+        ],
+        "summary": "Obtém estatísticas das tarefas",
+        "description": "Retorna informações estatísticas sobre as tarefas do usuário autenticado",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "total_tasks": {
+                  "type": "integer",
+                  "example": 10
+                },
+                "overdue_tasks": {
+                  "type": "integer",
+                  "example": 2
+                },
+                "status": {
+                  "type": "object",
+                  "example": {
+                    "pendente": 5,
+                    "em_andamento": 3,
+                    "concluida": 2
+                  }
+                },
+                "priority": {
+                  "type": "object",
+                  "example": {
+                    "baixa": 3,
+                    "media": 4,
+                    "alta": 3
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          }
+        }
+      }
+    },
+    "/tasks/export": {
+      "get": {
+        "tags": [
+          "Exportação"
+        ],
+        "summary": "Exporta tarefas para CSV",
+        "description": "Gera um arquivo CSV com todas as tarefas do usuário autenticado",
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "produces": [
+          "text/csv"
+        ],
+        "responses": {
+          "200": {
+            "description": "Arquivo CSV gerado com sucesso",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "401": {
+            "description": "Não autorizado - Token inválido ou ausente"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Task": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "title": {
+          "type": "string",
+          "example": "Implementar API Flask"
+        },
+        "description": {
+          "type": "string",
+          "example": "Desenvolver uma API REST com Flask"
+        },
+        "status": {
+          "type": "string",
+          "example": "pendente",
+          "enum": [
+            "pendente",
+            "em_andamento",
+            "concluida"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "example": "media",
+          "enum": [
+            "baixa",
+            "media",
+            "alta"
+          ]
+        },
+        "due_date": {
+          "type": "string",
+          "example": "2025-12-31 23:59:59"
+        },
+        "created_at": {
+          "type": "string",
+          "example": "2025-05-17 16:30:00"
+        },
+        "updated_at": {
+          "type": "string",
+          "example": "2025-05-17 16:30:00"
+        },
+        "user_id": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    }
+  },  "tags": [
+    {
+      "name": "Autenticação",
+      "description": "Operações relacionadas à autenticação de usuários"
+    },
+    {
+      "name": "Usuário",
+      "description": "Operações relacionadas a usuários"
+    },
+    {
+      "name": "Tarefas",
+      "description": "Gerenciamento de tarefas do usuário"
+    },
+    {
+      "name": "Estatísticas",
+      "description": "Estatísticas e métricas sobre tarefas"
+    },
+    {
+      "name": "Exportação",
+      "description": "Exportação de dados para formatos externos"
+    }
+  ]
+}
