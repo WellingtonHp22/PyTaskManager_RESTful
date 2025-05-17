@@ -118,12 +118,12 @@ PyTaskManager é uma API RESTful completa para gerenciamento de tarefas pessoais
 
 ## 📈 Próximas melhorias planejadas 🔮
 
-- [ ] 📧 Notificações por e-mail para tarefas próximas do prazo
-- [ ] 🔄 Suporte a mais formatos de exportação (JSON, XML, Excel)
-- [ ] 🖥️ Interface web para consumir a API
-- [ ] 📅 Integração com calendários externos
-- [ ] 🔄 Tarefas recorrentes e compartilháveis
-- [ ] 📱 Aplicativo mobile
+- 📧 Notificações por e-mail para tarefas próximas do prazo
+- 🔄 Suporte a mais formatos de exportação (JSON, XML, Excel)
+- 🖥️ Interface web para consumir a API
+- 📅 Integração com calendários externos
+- 🔄 Tarefas recorrentes e compartilháveis
+- 📱 Aplicativo mobile
 
 ## 📄 Licença 📜
 
